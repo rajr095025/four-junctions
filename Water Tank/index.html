@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <header>
+      <h2 style="text-align: center">Water Tank</h2>
+    </header>
+    <section style="display: flex; justify-content: center; gap: 50px">
+      <div style="position: relative">
+        <label for="length"
+          >Length of Tank<span style="color: red"> *</span> :</label
+        >
+        <input id="length" name="length" type="number" min="0" />
+        <p
+          id="tank-length-error"
+          style="
+            color: red;
+            position: absolute;
+            top: 10px;
+            text-align: center;
+            left: 10px;
+          "
+        ></p>
+      </div>
+
+      <div style="position: relative">
+        <label for="values"
+          >Water Values <span style="color: red"> *</span> :</label
+        >
+        <input name="values" id="values" type="string" />
+        <p
+          id="water-values-error"
+          style="
+            color: red;
+            position: absolute;
+            top: 10px;
+            text-align: center;
+            left: 10px;
+          "
+        ></p>
+      </div>
+    </section>
+    <section id="final-output-container;">
+      <h3 style="text-align: center">Final Output</h3>
+      <div
+        id="final-output"
+        style="
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+        "
+      >
+        Give input values for generating output.
+      </div>
+    </section>
+    <script src="./main.js"></script>
+  </body>
+</html>
