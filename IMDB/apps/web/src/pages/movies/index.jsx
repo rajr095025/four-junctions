@@ -16,7 +16,6 @@ import {
 } from "@mui/material";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
-import TabPanel from "@mui/lab/TabPanel";
 import InputBase from "@mui/material/InputBase";
 import IconButton from "@mui/material/IconButton";
 import SearchIcon from "@mui/icons-material/Search";
@@ -35,7 +34,7 @@ export default function Movies() {
 	const dispatch = useDispatch();
 	const { data: moviesData, isLoading } = useGetAllMovies();
 	const [searchTerm, setSearchTerm] = useState("");
-	const [selectedTab, setSelectedTab] = useState("");
+	const [selectedTab, setSelectedTab] = useState("imdb");
 	const [selectedMovieId, setSelectedMovieId] = useState(null);
 
 	let filteredMovieData = moviesData
