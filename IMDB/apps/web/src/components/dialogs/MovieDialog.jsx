@@ -60,6 +60,9 @@ const formatLocalDate = (isoDate) => {
 };
 
 export default function MovieDialog() {
+	const token =
+		"eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhNDNmMGZmNzk5OWQ2NDU5NTI0YjE2ZmFmZmVlYjZmNCIsIm5iZiI6MTY4MDY2NjM0MC42MTQsInN1YiI6IjY0MmNlZWU0MmRmZmQ4MDBiNWE1ZTdiNSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.FOutSp3MM4JNLKsCmjSgCjtgddNNIFk0JUVpM9gLAGk";
+
 	const dispatch = useDispatch();
 	const { open, selectedItem } = useSelector((state) => state.dialog.movies);
 	const addMovie = useAddMovie();
@@ -94,13 +97,22 @@ export default function MovieDialog() {
 		if (selectedItem) {
 			const producer = selectedItem.producer._id;
 			const actors = selectedItem.actors.map(({ _id }) => _id);
-			reset({ ...selectedItem, producer, actors ,releasedAt: selectedItem.releasedAt
-				? selectedItem.releasedAt ? formatLocalDate(selectedItem.releasedAt) : ""
-				: "",});
+			reset({
+				...selectedItem,
+				producer,
+				actors,
+				releasedAt: selectedItem.releasedAt
+					? selectedItem.releasedAt
+						? formatLocalDate(selectedItem.releasedAt)
+						: ""
+					: "",
+			});
 
 			if (selectedItem.poster) {
 				// setPosterPreview(selectedItem.poster);
-				setPosterPreview(`${import.meta.env.VITE_API_URL}${selectedItem.poster}`)
+				setPosterPreview(
+					`${import.meta.env.VITE_API_URL}${selectedItem.poster}`
+				);
 			}
 		} else {
 			reset({
@@ -150,7 +162,6 @@ export default function MovieDialog() {
 				// 	formData.append("actors[]", actorId);
 				// });
 				formData.append(key, JSON.stringify(data[key]));
-				
 			} else {
 				formData.append(key, data[key]);
 			}
@@ -172,6 +183,32 @@ export default function MovieDialog() {
 		dispatch(openDialog({ type: "producers", item: null }));
 	};
 
+	const [suggestions, setSuggestions] = useState([]);
+
+	const fetchMovieSuggestions = async (query) => {
+		if (!query) {
+			setSuggestions([]);
+			return;
+		}
+		try {
+			const res = await fetch(
+				`https://api.themoviedb.org/3/search/movie?query=${query}`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+						accept: "application/json",
+					},
+				}
+			);
+			const data = await res.json();
+			
+			setSuggestions(data.results || []);
+		} catch (err) {
+			console.error("Error fetching suggestions:", err);
+		}
+	};
+
 	return (
 		<>
 			<Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
@@ -184,10 +221,28 @@ export default function MovieDialog() {
 							<TextField
 								fullWidth
 								label="Name"
-								{...register("name")}
+								{...register("name", {
+									onChange: (e) =>
+										fetchMovieSuggestions(e.target.value),
+								})}
 								error={!!errors.name}
 								helperText={errors.name?.message}
 							/>
+							{suggestions.length > 0 && (
+								<ul className="border border-gray-300 rounded-lg mt-1 bg-white shadow-lg max-h-60 overflow-auto">
+									{suggestions.map((movie) => (
+										<li
+											key={movie.id}
+											className="p-2 hover:bg-gray-100 cursor-pointer"
+											onClick={() => {
+												setValue("name", movie.title);
+												setSuggestions([]);
+											}}>
+											{movie.title}
+										</li>
+									))}
+								</ul>
+							)}
 							<TextField
 								fullWidth
 								label="Release Date"
