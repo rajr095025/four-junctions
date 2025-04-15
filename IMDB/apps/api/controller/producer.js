@@ -1,11 +1,10 @@
 import { Producer } from "../models/producer.js";
-import {Movie} from "../models/movie.js";
+import { Movie } from "../models/movie.js";
 
 export const getAllProducers = async (req, res) => {
 	try {
 		const producers = await Producer.find({}).lean();
 
-		
 		const producersWithMovies = await Promise.all(
 			producers.map(async (producer) => {
 				const movies = await Movie.find({ producer: producer._id })

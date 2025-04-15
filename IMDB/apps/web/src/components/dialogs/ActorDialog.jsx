@@ -12,15 +12,20 @@ import {
 	InputLabel,
 	Select,
 	MenuItem,
+	CircularProgress,
 } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useAddActor, useUpdateActor } from "../../hooks/actors";
+import {
+	useAddActor,
+	useGetActorSuggestions,
+	useUpdateActor,
+} from "../../hooks/actors";
 import { closeDialog } from "../../store/slices/dialogSlice";
 
 const schema = yup.object().shape({
-	name: yup.string().required("Name is required"),
+	name: yup.mixed().required("Name is required"),
 	dob: yup.date().required("Date of birth is required"),
 	gender: yup.string().required("Gender is required"),
 	bio: yup.string().required("Biography is required"),
@@ -34,32 +39,32 @@ const formatLocalDate = (isoDate) => {
 	return `${year}-${month}-${day}`;
 };
 
-const token =
-	"eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhNDNmMGZmNzk5OWQ2NDU5NTI0YjE2ZmFmZmVlYjZmNCIsIm5iZiI6MTY4MDY2NjM0MC42MTQsInN1YiI6IjY0MmNlZWU0MmRmZmQ4MDBiNWE1ZTdiNSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.FOutSp3MM4JNLKsCmjSgCjtgddNNIFk0JUVpM9gLAGk";
-
 export default function ActorDialog() {
 	const dispatch = useDispatch();
 	const { open, selectedItem } = useSelector((state) => state.dialog.actors);
-	const addActor = useAddActor();
-	const updateActor = useUpdateActor(selectedItem?._id);
-
+	const { mutateAsync: addActor, isPending: addActorPending } = useAddActor();
+	const { mutateAsync: updateActor, isPending: updateActorPending } =
+		useUpdateActor(selectedItem?._id);
+	const [suggestionsSearch, setSuggestionsSearch] = useState("");
+	const { data: actorSuggestions } =
+		useGetActorSuggestions(suggestionsSearch);
 	const {
 		register,
 		handleSubmit,
 		reset,
 		control,
 		setValue,
-		watch,
 		formState: { errors },
 	} = useForm({
 		resolver: yupResolver(schema),
 		defaultValues: {
-			name: "",
+			name: null,
 			dob: "",
 			gender: "",
 			bio: "",
 		},
 	});
+	const isPending = addActorPending || updateActorPending;
 
 	useEffect(() => {
 		if (selectedItem) {
@@ -70,57 +75,50 @@ export default function ActorDialog() {
 						? formatLocalDate(selectedItem.dob)
 						: ""
 					: "",
-				gender: selectedItem.gender?.toLowerCase() || "",
+				gender: selectedItem?.gender?.toLowerCase() ?? "",
 			};
-
 			reset(formattedItem);
-		} else {
-			reset({
-				name: "",
-				dob: "",
-				gender: "",
-				bio: "",
-			});
 		}
 	}, [selectedItem, reset]);
 
 	const handleClose = () => {
-		reset();
-		dispatch(closeDialog({ type: "actors" }));
+		if (isPending === false) {
+			reset();
+			dispatch(closeDialog({ type: "actors" }));
+			setSuggestionsSearch("");
+		}
+	};
+
+	const onActorSuggestionSelect = (actor) => () => {
+		setValue("name", actor.name);
+		if (actor.gender > 0) {
+			switch (actor.gender) {
+				case 1:
+					setValue("gender", "female");
+					break;
+				case 2:
+					setValue("gender", "male");
+					break;
+				case 3:
+					setValue("gender", "other");
+					break;
+				default:
+					break;
+			}
+		}
+		setSuggestionsSearch("");
 	};
 
 	const onSubmit = async (data) => {
+		const postData = { ...data, name: data.name.name };
 		if (selectedItem) {
-			await updateActor.mutateAsync(data);
+			await updateActor(postData);
 		} else {
-			await addActor.mutateAsync(data);
+			await addActor(postData);
 		}
-		handleClose();
-	};
-
-	const [actorSuggestions, setActorSuggestions] = useState([]);
-
-	const fetchActorSuggestions = async (query) => {
-		if (!query) {
-			setActorSuggestions([]);
-			return;
-		}
-		try {
-			const res = await fetch(
-				`https://api.themoviedb.org/3/search/person?query=${query}`,
-				{
-					method: "GET",
-					headers: {
-						Authorization: `Bearer ${token}`,
-						accept: "application/json",
-					},
-				}
-			);
-			const data = await res.json();
-			setActorSuggestions(data.results || []);
-		} catch (err) {
-			console.error("Error fetching actor suggestions:", err);
-		}
+		dispatch(closeDialog({ type: "actors" }));
+		reset();
+		setSuggestionsSearch("");
 	};
 
 	return (
@@ -136,22 +134,21 @@ export default function ActorDialog() {
 							label="Name"
 							{...register("name", {
 								onChange: (e) =>
-									fetchActorSuggestions(e.target.value),
+									setSuggestionsSearch(e.target.value),
 							})}
+							autoComplete="off"
 							error={!!errors.name}
 							helperText={errors.name?.message}
 						/>
-
-						{actorSuggestions.length > 0 && (
+						{(actorSuggestions ?? []).length > 0 && (
 							<ul className="absolute z-10 border rounded bg-white mt-1 shadow-lg max-h-60 overflow-auto">
 								{actorSuggestions.map((actor) => (
 									<li
 										key={actor.id}
 										className="p-2 hover:bg-gray-100 cursor-pointer"
-										onClick={() => {
-											setValue("name", actor.name);
-											setActorSuggestions([]);
-										}}>
+										onClick={onActorSuggestionSelect(
+											actor
+										)}>
 										{actor.name}
 									</li>
 								))}
@@ -207,11 +204,16 @@ export default function ActorDialog() {
 					</Box>
 				</DialogContent>
 				<DialogActions>
-					<Button onClick={handleClose}>Cancel</Button>
+					<Button disabled={isPending} onClick={handleClose}>
+						Cancel
+					</Button>
 					<Button
 						type="submit"
 						variant="contained"
-						disabled={addActor.isPending || updateActor.isPending}>
+						disabled={isPending}
+						startIcon={
+							isPending ? <CircularProgress size={15} /> : null
+						}>
 						{selectedItem ? "Update" : "Add"}
 					</Button>
 				</DialogActions>

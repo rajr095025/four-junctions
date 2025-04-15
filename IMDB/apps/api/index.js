@@ -1,7 +1,6 @@
 import Express from "express";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
-import fileUpload from "express-fileupload";
 import cors from "cors";
 
 import actorRouter from "./routes/actors.js";
@@ -16,13 +15,7 @@ app.use(
 	})
 );
 app.use(bodyParser.json());
-app.use(
-	fileUpload({
-		parseNested: true,
-	})
-);
 
-app.use("/posters", Express.static("./posters"));
 app.use("/actors", actorRouter);
 app.use("/producers", producerRouter);
 app.use("/movies", movieRouter);

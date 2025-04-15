@@ -63,7 +63,9 @@ export default function ProducerDialog() {
 			const formattedItem = {
 				...selectedItem,
 				dob: selectedItem.dob
-					? selectedItem.dob ? formatLocalDate(selectedItem.dob) : ""
+					? selectedItem.dob
+						? formatLocalDate(selectedItem.dob)
+						: ""
 					: "",
 				gender: selectedItem.gender?.toLowerCase() || "",
 			};
@@ -112,7 +114,11 @@ export default function ProducerDialog() {
 							fullWidth
 							label="Date of Birth"
 							type="date"
-							InputLabelProps={{ shrink: true }}
+							slotProps={{
+								inputLabel: {
+									shrink: true,
+								},
+							}}
 							{...register("dob")}
 							error={!!errors.dob}
 							helperText={errors.dob?.message}
@@ -127,10 +133,11 @@ export default function ProducerDialog() {
 									<Select
 										labelId="gender-label"
 										label="Gender"
-										{...field}
-									>
+										{...field}>
 										<MenuItem value="male">Male</MenuItem>
-										<MenuItem value="female">Female</MenuItem>
+										<MenuItem value="female">
+											Female
+										</MenuItem>
 										<MenuItem value="other">Other</MenuItem>
 									</Select>
 								)}

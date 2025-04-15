@@ -16,19 +16,20 @@ import {
 	OutlinedInput,
 	IconButton,
 	Typography,
+	CircularProgress,
 } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useAddMovie, useUpdateMovie } from "../../hooks/movies";
+import {
+	useAddMovie,
+	useGetMovieSuggestions,
+	useUpdateMovie,
+} from "../../hooks/movies";
 import { useGetAllActors } from "../../hooks/actors";
 import { useGetAllProducers } from "../../hooks/producers";
 import { closeDialog } from "../../store/slices/dialogSlice";
-import {
-	Add as AddIcon,
-	Close as CloseIcon,
-	CloudUpload as CloudUploadIcon,
-} from "@mui/icons-material";
+import { Add as AddIcon } from "@mui/icons-material";
 import { openDialog } from "../../../redux/slice/dialogSlice";
 
 const schema = yup.object().shape({
@@ -60,16 +61,15 @@ const formatLocalDate = (isoDate) => {
 };
 
 export default function MovieDialog() {
-	const token =
-		"eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhNDNmMGZmNzk5OWQ2NDU5NTI0YjE2ZmFmZmVlYjZmNCIsIm5iZiI6MTY4MDY2NjM0MC42MTQsInN1YiI6IjY0MmNlZWU0MmRmZmQ4MDBiNWE1ZTdiNSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.FOutSp3MM4JNLKsCmjSgCjtgddNNIFk0JUVpM9gLAGk";
-
 	const dispatch = useDispatch();
 	const { open, selectedItem } = useSelector((state) => state.dialog.movies);
-	const addMovie = useAddMovie();
-	const updateMovie = useUpdateMovie(selectedItem?._id);
+	const { mutateAsync: addMovie, isPending: addMoviePending } = useAddMovie();
+	const { mutateAsync: updateMovie, isPending: updateMoviePending } =
+		useUpdateMovie(selectedItem?._id);
 	const { data: actorsData } = useGetAllActors();
 	const { data: producersData } = useGetAllProducers();
-	const [posterPreview, setPosterPreview] = useState(null);
+	const [suggestionsSearch, setSuggestionsSearch] = useState("");
+	const { data: suggestions } = useGetMovieSuggestions(suggestionsSearch);
 
 	const {
 		register,
@@ -85,13 +85,13 @@ export default function MovieDialog() {
 			name: "",
 			releasedAt: "",
 			plot: "",
-			poster: null,
+			poster: "",
 			producer: "",
 			actors: [],
 		},
 	});
-
-	const posterFile = watch("poster");
+	const isPending = addMoviePending || updateMoviePending;
+	const currentPosterPath = watch("poster");
 
 	useEffect(() => {
 		if (selectedItem) {
@@ -107,13 +107,6 @@ export default function MovieDialog() {
 						: ""
 					: "",
 			});
-
-			if (selectedItem.poster) {
-				// setPosterPreview(selectedItem.poster);
-				setPosterPreview(
-					`${import.meta.env.VITE_API_URL}${selectedItem.poster}`
-				);
-			}
 		} else {
 			reset({
 				name: "",
@@ -123,56 +116,37 @@ export default function MovieDialog() {
 				producer: "",
 				actors: [],
 			});
-			setValue("poster", null);
-			setPosterPreview(null);
 			dispatch(closeDialog({ type: "movies" }));
 		}
-	}, [selectedItem, reset]);
-
-	useEffect(() => {
-		if (posterFile instanceof FileList && posterFile.length > 0) {
-			const file = posterFile[0];
-			const reader = new FileReader();
-
-			reader.onloadend = () => {
-				setPosterPreview(reader.result);
-			};
-
-			reader.readAsDataURL(file);
-		}
-	}, [posterFile]);
+	}, [selectedItem, reset, setValue, dispatch]);
 
 	const handleClose = () => {
-		reset();
-		setPosterPreview(null);
-		dispatch(closeDialog({ type: "movies" }));
+		if (isPending === false) {
+			reset();
+			dispatch(closeDialog({ type: "movies" }));
+			setSuggestionsSearch("");
+		}
+	};
+
+	const onMovieSelect = (movie) => () => {
+		setValue("name", movie.title);
+		setValue("releasedAt", movie.release_date);
+		setValue("plot", movie.overview);
+		if (movie?.poster_path != null) {
+			setValue("poster", movie.poster_path);
+		}
+		setSuggestionsSearch("");
 	};
 
 	const onSubmit = async (data) => {
-		// Create FormData to handle file upload
-		const formData = new FormData();
-
-		// Append all form fields to FormData
-		Object.keys(data).forEach((key) => {
-			if (key === "poster" && data[key] instanceof FileList) {
-				formData.append(key, data[key][0]);
-			} else if (key === "actors") {
-				// Handle array of actor IDs
-				// data[key].forEach((actorId) => {
-				// 	formData.append("actors[]", actorId);
-				// });
-				formData.append(key, JSON.stringify(data[key]));
-			} else {
-				formData.append(key, data[key]);
-			}
-		});
-
 		if (selectedItem) {
-			await updateMovie.mutateAsync(formData);
+			await updateMovie(data);
 		} else {
-			await addMovie.mutateAsync(formData);
+			await addMovie(data);
 		}
-		handleClose();
+		reset();
+		dispatch(closeDialog({ type: "movies" }));
+		setSuggestionsSearch("");
 	};
 
 	const handleOpenActorDialog = () => {
@@ -181,32 +155,6 @@ export default function MovieDialog() {
 
 	const handleOpenProducerDialog = () => {
 		dispatch(openDialog({ type: "producers", item: null }));
-	};
-
-	const [suggestions, setSuggestions] = useState([]);
-
-	const fetchMovieSuggestions = async (query) => {
-		if (!query) {
-			setSuggestions([]);
-			return;
-		}
-		try {
-			const res = await fetch(
-				`https://api.themoviedb.org/3/search/movie?query=${query}`,
-				{
-					method: "GET",
-					headers: {
-						Authorization: `Bearer ${token}`,
-						accept: "application/json",
-					},
-				}
-			);
-			const data = await res.json();
-			
-			setSuggestions(data.results || []);
-		} catch (err) {
-			console.error("Error fetching suggestions:", err);
-		}
 	};
 
 	return (
@@ -223,21 +171,19 @@ export default function MovieDialog() {
 								label="Name"
 								{...register("name", {
 									onChange: (e) =>
-										fetchMovieSuggestions(e.target.value),
+										setSuggestionsSearch(e.target.value),
 								})}
+								autoComplete="off"
 								error={!!errors.name}
 								helperText={errors.name?.message}
 							/>
-							{suggestions.length > 0 && (
-								<ul className="border border-gray-300 rounded-lg mt-1 bg-white shadow-lg max-h-60 overflow-auto">
+							{(suggestions ?? []).length > 0 && (
+								<ul className="absolute z-10 border rounded bg-white mt-1 shadow-lg max-h-60 overflow-auto">
 									{suggestions.map((movie) => (
 										<li
 											key={movie.id}
 											className="p-2 hover:bg-gray-100 cursor-pointer"
-											onClick={() => {
-												setValue("name", movie.title);
-												setSuggestions([]);
-											}}>
+											onClick={onMovieSelect(movie)}>
 											{movie.title}
 										</li>
 									))}
@@ -247,7 +193,11 @@ export default function MovieDialog() {
 								fullWidth
 								label="Release Date"
 								type="date"
-								InputLabelProps={{ shrink: true }}
+								slotProps={{
+									inputLabel: {
+										shrink: true,
+									},
+								}}
 								{...register("releasedAt")}
 								error={!!errors.releasedAt}
 								helperText={errors.releasedAt?.message}
@@ -261,58 +211,14 @@ export default function MovieDialog() {
 								error={!!errors.plot}
 								helperText={errors.plot?.message}
 							/>
-							<Box>
+							<Box className="flex gap-2 flex-col">
 								<Typography variant="subtitle1" gutterBottom>
 									Poster
 								</Typography>
-								<Box
-									className="border-2 border-dashed border-gray-300 rounded-md p-4 flex flex-col items-center justify-center"
-									sx={{ minHeight: "150px" }}>
-									{posterPreview ? (
-										<Box className="relative w-full h-40">
-											<img
-												src={posterPreview}
-												alt="Poster preview"
-												className="w-full h-full object-contain"
-											/>
-											<IconButton
-												className="absolute top-0 right-0 bg-white"
-												onClick={() => {
-													setValue("poster", null);
-													setPosterPreview(null);
-												}}>
-												<CloseIcon />
-											</IconButton>
-										</Box>
-									) : (
-										<Box className="text-center">
-											<CloudUploadIcon
-												sx={{
-													fontSize: 40,
-													color: "text.secondary",
-													mb: 1,
-												}}
-											/>
-											<Typography
-												variant="body2"
-												color="text.secondary"
-												gutterBottom>
-												Click to upload or drag and drop
-											</Typography>
-											<Button
-												variant="outlined"
-												component="label">
-												Upload Poster
-												<input
-													type="file"
-													hidden
-													accept="image/*"
-													{...register("poster")}
-												/>
-											</Button>
-										</Box>
-									)}
-								</Box>
+								<img
+									className="h-40 w-40 self-center object-contain"
+									src={`https://image.tmdb.org/t/p/w500${currentPosterPath}`}
+								/>
 								{errors.poster && (
 									<Typography color="error" variant="caption">
 										{errors.poster.message}
@@ -386,12 +292,7 @@ export default function MovieDialog() {
 													<OutlinedInput label="Actors" />
 												}
 												renderValue={(selected) => (
-													<Box
-														sx={{
-															display: "flex",
-															flexWrap: "wrap",
-															gap: 0.5,
-														}}>
+													<Box className="flex flex-wrap gap-2">
 														{selected.map(
 															(value) => {
 																const actor =
@@ -442,13 +343,18 @@ export default function MovieDialog() {
 						</Box>
 					</DialogContent>
 					<DialogActions>
-						<Button onClick={handleClose}>Cancel</Button>
+						<Button disabled={isPending} onClick={handleClose}>
+							Cancel
+						</Button>
 						<Button
 							type="submit"
 							variant="contained"
-							disabled={
-								addMovie.isPending || updateMovie.isPending
-							}>
+							startIcon={
+								isPending ? (
+									<CircularProgress size={15} />
+								) : null
+							}
+							disabled={isPending}>
 							{selectedItem ? "Update" : "Add"}
 						</Button>
 					</DialogActions>

@@ -1,12 +1,10 @@
 import { Actor } from "../models/actor.js";
 import { Movie } from "../models/movie.js";
 
-
 export const getAllActors = async (req, res) => {
 	try {
 		const actors = await Actor.find({}).lean();
 
-		
 		// Fetch movies for each actor
 		const actorsWithMovies = await Promise.all(
 			actors.map(async (actor) => {
@@ -19,8 +17,6 @@ export const getAllActors = async (req, res) => {
 				};
 			})
 		);
-
-
 
 		return res.json({
 			data: actorsWithMovies,
