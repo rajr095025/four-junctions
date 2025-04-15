@@ -110,7 +110,7 @@ export default function ActorDialog() {
 	};
 
 	const onSubmit = async (data) => {
-		const postData = { ...data, name: data.name.name };
+		const postData = { ...data };
 		if (selectedItem) {
 			await updateActor(postData);
 		} else {
