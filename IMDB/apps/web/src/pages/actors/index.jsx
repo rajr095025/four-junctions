@@ -12,14 +12,10 @@ import {
 	Typography,
 	Tab,
 	Chip,
-	Avatar,
+	TextField,
+	Tabs,
 } from "@mui/material";
-import TabContext from "@mui/lab/TabContext";
-import TabList from "@mui/lab/TabList";
-import InputBase from "@mui/material/InputBase";
-import IconButton from "@mui/material/IconButton";
 import SearchIcon from "@mui/icons-material/Search";
-
 import { useGetAllActors } from "../../hooks/actors";
 import { Add as AddIcon, Edit as EditIcon } from "@mui/icons-material";
 import { openDialog } from "../../store/slices/dialogSlice";
@@ -31,16 +27,13 @@ import ActorDetails from "./ActorDetails";
 export default function Actors() {
 	const dispatch = useDispatch();
 	const { data: actorsData, isLoading } = useGetAllActors();
-
 	const [searchTerm, setSearchTerm] = useState("");
 	const [selectedActorId, setSelectedActorId] = useState(null);
 	const [selectedTab, setSelectedTab] = useState("imdb");
 
-	let filteredActorsData = actorsData
-		? actorsData?.filter((actor) =>
-				actor.name.toLowerCase().includes(searchTerm.toLowerCase())
-			)
-		: actorsData;
+	const filteredActorsData = (actorsData ?? []).filter((actor) =>
+		actor.name.toLowerCase().includes(searchTerm.toLowerCase())
+	);
 
 	const handleOpen = (actor = null) => {
 		dispatch(openDialog({ type: "actors", item: actor }));
@@ -56,28 +49,16 @@ export default function Actors() {
 				<Typography variant="h4" className="font-bold">
 					Actors
 				</Typography>
-				<Paper
-					component="form"
-					sx={{
-						p: "2px 4px",
-						display: "flex",
-						alignItems: "center",
-						width: 400,
-					}}>
-					<InputBase
-						sx={{ ml: 1, flex: 1 }}
-						placeholder="Search Actors"
-						inputProps={{ "aria-label": "search actors" }}
-						value={searchTerm}
-						onChange={(e) => setSearchTerm(e.target.value)}
-					/>
-					<IconButton
-						type="button"
-						sx={{ p: "10px" }}
-						aria-label="search">
-						<SearchIcon />
-					</IconButton>
-				</Paper>
+				<TextField
+					placeholder="Search Actors"
+					value={searchTerm}
+					onChange={(e) => setSearchTerm(e.target.value)}
+					slotProps={{
+						input: {
+							endAdornment: <SearchIcon />,
+						},
+					}}
+				/>
 				<Button
 					variant="contained"
 					startIcon={<AddIcon />}
@@ -85,25 +66,20 @@ export default function Actors() {
 					Add Actor
 				</Button>
 			</Box>
-
-			<Box sx={{ width: "100%", typography: "body1" }}>
-				<TabContext value={selectedTab}>
-					<Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-						<TabList
-							onChange={(e, newValue) => {
-								console.log("value changed", newValue);
-								setSelectedTab(newValue);
-							}}
-							aria-label="lab API tabs example">
-							<Tab label="IMDB" value="imdb" />
-							<Tab label="TMDB" value="tmdb" />
-						</TabList>
-					</Box>
-				</TabContext>
+			<Box className="w-full">
+				<Tabs
+					value={selectedTab}
+					onChange={(e, newValue) => {
+						setSearchTerm("");
+						setSelectedTab(newValue);
+					}}>
+					<Tab label="IMDB" value="imdb" />
+					<Tab label="TMDB" value="tmdb" />
+				</Tabs>
 			</Box>
 
 			{selectedTab === "imdb" ? (
-				<TableContainer component={Paper} className="shadow-lg">
+				<TableContainer component={Paper}>
 					<Table>
 						<TableHead>
 							<TableRow>
@@ -116,37 +92,35 @@ export default function Actors() {
 							</TableRow>
 						</TableHead>
 						<TableBody>
-							{filteredActorsData?.map((actor) => (
+							{filteredActorsData.map((actor) => (
 								<TableRow key={actor._id}>
 									<TableCell>{actor.name}</TableCell>
 									<TableCell>
-										{actor.dob &&
-											new Date(
-												actor.dob
-											).toLocaleDateString()}
+										{actor?.dob
+											? new Date(
+													actor.dob
+												).toLocaleDateString()
+											: "No data"}
 									</TableCell>
 									<TableCell>{actor.gender}</TableCell>
-									<TableCell>
+									<TableCell title={actor.bio}>
 										{actor.bio && actor.bio.length > 100
 											? `${actor.bio.substring(0, 100)}...`
 											: actor.bio}
 									</TableCell>
-									{/* <TableCell>{actor.movies}</TableCell> */}
-
 									<TableCell>
-										<Box
-											sx={{
-												display: "flex",
-												flexWrap: "wrap",
-												gap: 0.5,
-											}}>
-											{actor.movies?.map((actor) => (
-												<Chip
-													key={actor._id || actor}
-													label={actor.name || actor}
-													size="small"
-												/>
-											))}
+										<Box className="flex flex-wrap gap-2">
+											{(actor?.movies ?? []).map(
+												(actor) => (
+													<Chip
+														key={actor._id || actor}
+														label={
+															actor.name || actor
+														}
+														size="small"
+													/>
+												)
+											)}
 										</Box>
 									</TableCell>
 									<TableCell>
@@ -163,16 +137,12 @@ export default function Actors() {
 				</TableContainer>
 			) : (
 				<div className="flex gap-8">
-					<div className="flex-1">
-						<ActorList
-							searchTerm={searchTerm}
-							selectedActorId={selectedActorId}
-							onActorSelect={setSelectedActorId}
-						/>
-					</div>
-					{selectedActorId && (
-						<ActorDetails actorId={selectedActorId} />
-					)}
+					<ActorList
+						searchTerm={searchTerm}
+						selectedActorId={selectedActorId}
+						onActorSelect={setSelectedActorId}
+					/>
+					<ActorDetails actorId={selectedActorId} />
 				</div>
 			)}
 

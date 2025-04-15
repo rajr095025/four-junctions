@@ -12,10 +12,12 @@ import {
 	Typography,
 	Chip,
 	Avatar,
+	TextField,
+	CircularProgress,
 } from "@mui/material";
-import InputBase from '@mui/material/InputBase';
-import IconButton from '@mui/material/IconButton';
-import SearchIcon from '@mui/icons-material/Search';
+import InputBase from "@mui/material/InputBase";
+import IconButton from "@mui/material/IconButton";
+import SearchIcon from "@mui/icons-material/Search";
 import { useGetAllProducers } from "../../hooks/producers";
 import { Add as AddIcon, Edit as EditIcon } from "@mui/icons-material";
 import { openDialog } from "../../store/slices/dialogSlice";
@@ -25,20 +27,22 @@ import { useState } from "react";
 export default function Producers() {
 	const dispatch = useDispatch();
 	const { data: producersData, isLoading } = useGetAllProducers();
+	const [searchTerm, setSearchTerm] = useState("");
 
-		const [searchTerm, setSearchTerm] = useState("");
-	
-		let filteredProducersData = producersData ? producersData?.filter((producer) =>
-			producer.name.toLowerCase().includes(searchTerm.toLowerCase())
-		) : producersData;
-	
+	const filteredProducersData = (producersData ?? []).filter((producer) =>
+		producer.name.toLowerCase().includes(searchTerm.toLowerCase())
+	);
 
 	const handleOpen = (producer = null) => {
 		dispatch(openDialog({ type: "producers", item: producer }));
 	};
 
 	if (isLoading) {
-		return <Typography>Loading...</Typography>;
+		return (
+			<div className="h-full w-2/3 flex items-center justify-center">
+				<CircularProgress size={20} />
+			</div>
+		);
 	}
 
 	return (
@@ -47,23 +51,16 @@ export default function Producers() {
 				<Typography variant="h4" className="font-bold">
 					Producers
 				</Typography>
-				<Paper
-      component="form"
-      sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 400 }}
-    >
- 
-      <InputBase
-        sx={{ ml: 1, flex: 1 }}
-        placeholder="Search Producers"
-        inputProps={{ 'aria-label': 'search producers' }}
-		value={searchTerm}
-		onChange={(e) => setSearchTerm(e.target.value)}
-      />
-      <IconButton type="button" sx={{ p: '10px' }} aria-label="search">
-        <SearchIcon />
-      </IconButton>
- 
-    </Paper>
+				<TextField
+					placeholder="Search Producers"
+					value={searchTerm}
+					onChange={(e) => setSearchTerm(e.target.value)}
+					slotProps={{
+						input: {
+							endAdornment: <SearchIcon />,
+						},
+					}}
+				/>
 				<Button
 					variant="contained"
 					startIcon={<AddIcon />}
@@ -85,7 +82,7 @@ export default function Producers() {
 						</TableRow>
 					</TableHead>
 					<TableBody>
-						{filteredProducersData?.map((producer) => (
+						{filteredProducersData.map((producer) => (
 							<TableRow key={producer._id}>
 								<TableCell>{producer.name}</TableCell>
 								<TableCell>
@@ -95,22 +92,17 @@ export default function Producers() {
 										).toLocaleDateString()}
 								</TableCell>
 								<TableCell>{producer.gender}</TableCell>
-								<TableCell>
+								<TableCell title={producer.bio}>
 									{producer.bio && producer.bio.length > 100
 										? `${producer.bio.substring(0, 100)}...`
 										: producer.bio}
 								</TableCell>
 								<TableCell>
-									<Box
-										sx={{
-											display: "flex",
-											flexWrap: "wrap",
-											gap: 0.5,
-										}}>
-										{producer.movies?.map((actor) => (
+									<Box className="flex flex-wrap gap-2">
+										{producer?.movies.map((actor) => (
 											<Chip
-												key={actor._id || actor}
-												label={actor.name || actor}
+												key={actor._id}
+												label={actor.name}
 												size="small"
 											/>
 										))}
