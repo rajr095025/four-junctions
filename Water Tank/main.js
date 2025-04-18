@@ -109,12 +109,78 @@ function findTankCapacity(arr) {
   return { finalAnswer, finalAnswerArray };
 }
 
+function findTankCapacityOptimized(arr) {
+  let i = 0;
+  let j = arr.length - 1;
+  let lastGreaterValueIndexI = 0;
+  let lastGreaterValueIndexIValue = arr[i];
+  let lastGreaterValueIndexJ = 0;
+  let lastGreaterValueIndexJValue = arr[j];
+  let finalAnswerArray = Array(arr.length).fill(0);
+
+  while (i < j) {
+    if (arr[i] <= arr[j]) {
+      i++;
+      if (arr[i] > lastGreaterValueIndexIValue) {
+        lastGreaterValueIndexIValue = arr[i];
+        lastGreaterValueIndexI = i;
+      }
+      let value = lastGreaterValueIndexIValue - arr[i];
+
+      // console.log(
+      //   i,
+      //   arr[i],
+      //   "value > finalAnswerArray[i]",
+      //   value > finalAnswerArray[i],
+      //   value,
+      //   finalAnswerArray[i]
+      // );
+      if (value > finalAnswerArray[i]) {
+        finalAnswerArray[i] = value;
+      }
+    } else if (arr[i] > arr[j]) {
+      j--;
+      if (arr[j] > lastGreaterValueIndexJValue) {
+        lastGreaterValueIndexJValue = arr[j];
+        lastGreaterValueIndexJ = j;
+      }
+      let value = lastGreaterValueIndexJValue - arr[j];
+
+      // console.log(
+      //   "value > finalAnswerArray[i]",
+      //   value > finalAnswerArray[j],
+      //   value,
+      //   finalAnswerArray[j]
+      // );
+      if (value > finalAnswerArray[j]) {
+        finalAnswerArray[j] = value;
+      }
+    }
+  }
+
+  let finalAnswer = 0;
+  finalAnswerArray?.forEach((value) => {
+    finalAnswer += value;
+  });
+
+  // console.log(
+  //   "finalAnswer ",
+  //   finalAnswer,
+  //   "finalAnswerArray",
+  //   finalAnswerArray
+  // );
+
+  return { finalAnswer, finalAnswerArray };
+}
+
 function finalResultContainer() {
   let tankError = document.getElementById("tank-length-error").innerText;
   let waterError = document.getElementById("water-values-error").innerText;
   let waterValue = waterValuesElement?.value;
   let length = lengthElement?.value;
   let finalOutput = document.getElementById("final-output");
+
+  const isOptimized = document.getElementById("optimize-check-box").checked;
 
   if (length == "" || waterValue == "") {
     finalOutput.innerText = "Give input values for generating output.";
@@ -139,7 +205,9 @@ function finalResultContainer() {
 
   let maximumValue = Math.max(...waterValuesArray);
 
-  let { finalAnswer, finalAnswerArray } = findTankCapacity(waterValuesArray);
+  let { finalAnswer, finalAnswerArray } = isOptimized
+    ? findTankCapacityOptimized(waterValuesArray)
+    : findTankCapacity(waterValuesArray);
 
   let colorMatrix = [];
 
@@ -220,6 +288,8 @@ function finalResultContainer() {
     "finalAnswerArray",
     finalAnswerArray,
     "colorMatrix",
-    colorMatrix
+    colorMatrix,
+    "isOptimized",
+    isOptimized
   );
 }
