@@ -26,18 +26,19 @@ import ProducerDialog from "../../components/dialogs/ProducerDialog";
 import { useState } from "react";
 import MovieDetails from "./MovieDetails";
 import MovieList from "./MovieList";
+import SelectedMovieDialog from "../../components/dialogs/SelectedMovieDialog";
 
 export default function Movies() {
 	const dispatch = useDispatch();
 	const { data: moviesData, isLoading } = useGetAllMovies();
 	const [searchTerm, setSearchTerm] = useState("");
-	const [selectedTab, setSelectedTab] = useState("imdb");
+	const [selectedTab, setSelectedTab] = useState("tmdb");
 	const [selectedMovieId, setSelectedMovieId] = useState(null);
 
 	let filteredMovieData = moviesData
 		? moviesData?.filter((movie) =>
 				movie.name.toLowerCase().includes(searchTerm.toLowerCase())
-			)
+		  )
 		: moviesData;
 
 	const handleOpen = (movie = null) => {
@@ -48,9 +49,14 @@ export default function Movies() {
 		return <Typography>Loading...</Typography>;
 	}
 
+	function onMovieSelect(movie) {
+		dispatch(openDialog({ type: "selectedMovie", item: movie }));
+		// setSelectedMovieId(movie);
+	}
+
 	return (
-		<Box className="p-6">
-			<Box className="flex justify-between items-center mb-6">
+		<Box className="p-6 w-full">
+			<Box className="flex justify-between items-center mb-6 ">
 				<Typography variant="h4" className="font-bold">
 					Movies
 				</Typography>
@@ -80,8 +86,8 @@ export default function Movies() {
 						setSelectedTab(newValue);
 						setSearchTerm("");
 					}}>
-					<Tab label="IMDB" value="imdb" />
 					<Tab label="TMDB" value="tmdb" />
+					<Tab label="IMDB" value="imdb" />
 				</Tabs>
 			</Box>
 			{selectedTab === "imdb" ? (
@@ -119,7 +125,10 @@ export default function Movies() {
 									</TableCell>
 									<TableCell title={movie.plot}>
 										{movie.plot && movie.plot.length > 100
-											? `${movie.plot.substring(0, 100)}...`
+											? `${movie.plot.substring(
+													0,
+													100
+											  )}...`
 											: movie.plot}
 									</TableCell>
 									<TableCell>{movie.producer.name}</TableCell>
@@ -153,7 +162,7 @@ export default function Movies() {
 					<div className="flex-1">
 						<MovieList
 							searchTerm={searchTerm}
-							onMovieSelect={setSelectedMovieId}
+							onMovieSelect={onMovieSelect}
 						/>
 					</div>
 					{selectedMovieId && (
@@ -167,6 +176,7 @@ export default function Movies() {
 			<ActorDialog />
 			<ProducerDialog />
 			<MovieDialog />
+			<SelectedMovieDialog />
 		</Box>
 	);
 }

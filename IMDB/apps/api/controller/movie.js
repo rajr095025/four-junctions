@@ -1,4 +1,5 @@
 import { Movie } from "../models/movie.js";
+import { MovieWatchList } from "../models/movieWatchList.js";
 
 export const getAllMovies = async (req, res) => {
 	try {
@@ -23,6 +24,34 @@ export const addMovies = async (req, res) => {
 		await Movie.create(data);
 		return res.json({
 			message: "Movie created successfully",
+		});
+	} catch (error) {
+		res.status(500).json({
+			message: error.message,
+		});
+	}
+};
+
+export const addMovieToWatchList = async (req, res) => {
+	try {
+		const data = req.body;
+		await MovieWatchList.create(data);
+		return res.json({
+			message: "Movie created successfully",
+		});
+	} catch (error) {
+		res.status(500).json({
+			message: error.message,
+		});
+	}
+};
+
+export const getAllWatchListMovies = async (req, res) => {
+	try {
+		const movies = await MovieWatchList.find({}).lean();
+
+		return res.json({
+			data: movies,
 		});
 	} catch (error) {
 		res.status(500).json({

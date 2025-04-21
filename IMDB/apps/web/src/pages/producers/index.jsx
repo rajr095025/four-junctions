@@ -47,7 +47,7 @@ export default function Producers() {
 
 	return (
 		<Box className="p-6">
-			<Box className="flex justify-between items-center mb-6">
+			<Box className="flex justify-between items-center mb-6 w-full">
 				<Typography variant="h4" className="font-bold">
 					Producers
 				</Typography>

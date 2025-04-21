@@ -29,7 +29,7 @@ export default function Actors() {
 	const { data: actorsData, isLoading } = useGetAllActors();
 	const [searchTerm, setSearchTerm] = useState("");
 	const [selectedActorId, setSelectedActorId] = useState(null);
-	const [selectedTab, setSelectedTab] = useState("imdb");
+	const [selectedTab, setSelectedTab] = useState("tmdb");
 
 	const filteredActorsData = (actorsData ?? []).filter((actor) =>
 		actor.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -73,8 +73,8 @@ export default function Actors() {
 						setSearchTerm("");
 						setSelectedTab(newValue);
 					}}>
-					<Tab label="IMDB" value="imdb" />
 					<Tab label="TMDB" value="tmdb" />
+					<Tab label="IMDB" value="imdb" />
 				</Tabs>
 			</Box>
 
@@ -99,13 +99,16 @@ export default function Actors() {
 										{actor?.dob
 											? new Date(
 													actor.dob
-												).toLocaleDateString()
+											  ).toLocaleDateString()
 											: "No data"}
 									</TableCell>
 									<TableCell>{actor.gender}</TableCell>
 									<TableCell title={actor.bio}>
 										{actor.bio && actor.bio.length > 100
-											? `${actor.bio.substring(0, 100)}...`
+											? `${actor.bio.substring(
+													0,
+													100
+											  )}...`
 											: actor.bio}
 									</TableCell>
 									<TableCell>

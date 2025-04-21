@@ -9,6 +9,7 @@ import { enqueueSnackbar, SnackbarProvider } from "notistack";
 import { Provider } from "react-redux";
 import { store } from "../redux/store";
 import { AxiosError } from "axios";
+import MoviesWatchList from "./pages/movies/MovieWatchList";
 
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -57,6 +58,10 @@ function App() {
 									<Route
 										path="producers"
 										element={<Producers />}
+									/>
+									<Route
+										path="watchlist"
+										element={<MoviesWatchList />}
 									/>
 								</Route>
 							</Routes>

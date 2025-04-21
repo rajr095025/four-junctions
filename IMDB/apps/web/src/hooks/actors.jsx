@@ -52,6 +52,25 @@ export function useGetFullActorDetails(actorId) {
 	});
 }
 
+export function useGetFullActorMovies(actorId) {
+	return useQuery({
+		queryKey: ["movie_credits", actorId],
+		queryFn: () =>
+			axios.get(
+				`https://api.themoviedb.org/3/person/${actorId}/movie_credits`,
+				{
+					headers: {
+						Authorization: `Bearer ${
+							import.meta.env.VITE_TMDB_TOKEN
+						}`,
+					},
+				}
+			),
+		select: (responseData) => responseData.data,
+		enabled: !!actorId,
+	});
+}
+
 export function useGetPopularActors() {
 	return useQuery({
 		queryKey: ["actors", "tmdb", "popular"],
@@ -73,7 +92,9 @@ export function useGetActorSuggestions(query = "") {
 				`https://api.themoviedb.org/3/search/person?query=${query}`,
 				{
 					headers: {
-						Authorization: `Bearer ${import.meta.env.VITE_TMDB_TOKEN}`,
+						Authorization: `Bearer ${
+							import.meta.env.VITE_TMDB_TOKEN
+						}`,
 					},
 					params: {
 						query,

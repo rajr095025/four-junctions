@@ -5,7 +5,15 @@ const initialState = {
 		open: false,
 		selectedItem: null,
 	},
+	selectedMovie: {
+		open: false,
+		selectedItem: null,
+	},
 	actors: {
+		open: false,
+		selectedItem: null,
+	},
+	selectedActor: {
 		open: false,
 		selectedItem: null,
 	},

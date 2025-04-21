@@ -4,12 +4,7 @@ import { CircularProgress } from "@mui/material";
 export default function ActorDetails({ actorId }) {
 	const { data: actor, isLoading } = useGetFullActorDetails(actorId);
 
-	if (!actorId)
-		return (
-			<div className="h-full w-2/3 flex items-center justify-center">
-				<p>Select an actor to view details</p>
-			</div>
-		);
+	if (!actorId) return <></>;
 
 	if (isLoading) {
 		return (
@@ -20,7 +15,7 @@ export default function ActorDetails({ actorId }) {
 	}
 
 	return (
-		<div className="p-4 flex flex-col items-center w-2/3 h-full">
+		<div className="p-4 flex flex-col items-center  h-full">
 			<div className="max-w-md text-center">
 				<h2 className="text-2xl font-bold mb-2">{actor.name}</h2>
 				{actor.profile_path && (
