@@ -148,7 +148,6 @@ export default function Actors() {
 					<ActorDetails actorId={selectedActorId} />
 				</div>
 			)}
-
 			<ActorDialog />
 		</Box>
 	);

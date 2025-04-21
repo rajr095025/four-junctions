@@ -4,7 +4,9 @@ import { CircularProgress } from "@mui/material";
 export default function ActorDetails({ actorId }) {
 	const { data: actor, isLoading } = useGetFullActorDetails(actorId);
 
-	if (!actorId) return <></>;
+	if (!actorId){ 
+		return null
+	};
 
 	if (isLoading) {
 		return (

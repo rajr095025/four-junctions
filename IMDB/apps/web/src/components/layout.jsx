@@ -1,6 +1,5 @@
 import { List, ListItem, ListItemButton, ListItemText } from "@mui/material";
 import { Outlet, Link } from "react-router";
-
 import * as React from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -13,42 +12,14 @@ import LocalMoviesIcon from "@mui/icons-material/LocalMovies";
 import PeopleIcon from "@mui/icons-material/People";
 import LoyaltyIcon from "@mui/icons-material/Loyalty";
 import VideoCameraFrontIcon from "@mui/icons-material/VideoCameraFront";
-// import List from "@mui/material/List";
-// import ListItem from "@mui/material/ListItem";
-// import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
-// import ListItemText from "@mui/material/ListItemText";
 import MailIcon from "@mui/icons-material/Mail";
-
 import CardMedia from "@mui/material/CardMedia";
 import MenuIcon from "@mui/icons-material/Menu";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 
-// export default function Layout() {
-// 	return (
-// 		<main className="flex h-screen">
-// 			<List className="flex-[0.3]">
-// 				<ListItem disablePadding>
-// 					<ListItemButton component={Link} to="/producers">
-// 						<ListItemText primary="Producers" />
-// 					</ListItemButton>
-// 				</ListItem>
-// 				<ListItem disablePadding>
-// 					<ListItemButton component={Link} to="/actors">
-// 						<ListItemText primary="Actors" />
-// 					</ListItemButton>
-// 				</ListItem>
-// 				<ListItem disablePadding>
-// 					<ListItemButton component={Link} to="/movies">
-// 						<ListItemText primary="Movies" />
-// 					</ListItemButton>
-// 				</ListItem>
-// 			</List>
 
-// 		</main>
-// 	);
-// }
 const drawerWidth = 240;
 
 let sideNavBar = [
@@ -88,11 +59,6 @@ export default function ResponsiveDrawer(props) {
 					image="/logo.png"
 					className="w-36 h-12 "
 				/>
-				{/* <div className="bg-yellow-400 px-3 py-1 inline-block">
-					<span className="text-black font-[1000] text-4xl tracking-wide">
-						IMDb
-					</span>
-				</div> */}
 			</Box>
 			<Divider />
 			<List>
@@ -100,8 +66,6 @@ export default function ResponsiveDrawer(props) {
 					<ListItem key={item.name} disablePadding>
 						<ListItemButton component={Link} to={item.toLink}>
 							<ListItemIcon>
-								{/* {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-								 */}
 								{item.icon}
 							</ListItemIcon>
 							<ListItemText primary={item.name} />
@@ -109,56 +73,16 @@ export default function ResponsiveDrawer(props) {
 					</ListItem>
 				))}
 			</List>
-			{/* <Divider /> */}
-			{/* <List>
-				{["All mail", "Trash", "Spam"].map((text, index) => (
-					<ListItem key={text} disablePadding>
-						<ListItemButton>
-							<ListItemIcon>
-								{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-							</ListItemIcon>
-							<ListItemText primary={text} />
-						</ListItemButton>
-					</ListItem>
-				))}
-			</List> */}
 		</div>
 	);
-
-	// Remove this const when copying and pasting into your project.
-	const container =
-		window !== undefined ? () => window().document.body : undefined;
 
 	return (
 		<Box sx={{ display: "flex" }}>
 			<CssBaseline />
-			{/* <AppBar
-				position="fixed"
-				sx={{
-					width: { sm: `calc(100% - ${drawerWidth}px)` },
-					ml: { sm: `${drawerWidth}px` },
-				}}>
-				<Toolbar>
-					<IconButton
-						color="inherit"
-						aria-label="open drawer"
-						edge="start"
-						onClick={handleDrawerToggle}
-						sx={{ mr: 2, display: { sm: "none" } }}>
-						<MenuIcon />
-					</IconButton>
-					<Typography variant="h6" noWrap component="div">
-						Responsive drawer
-					</Typography>
-				</Toolbar>
-			</AppBar> */}
 			<Box
 				component="nav"
-				sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-				aria-label="mailbox folders">
-				{/* The implementation can be swapped with js to avoid SEO duplication of links. */}
+				sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}>
 				<Drawer
-					container={container}
 					variant="temporary"
 					open={mobileOpen}
 					onTransitionEnd={handleDrawerTransitionEnd}
@@ -172,7 +96,7 @@ export default function ResponsiveDrawer(props) {
 					}}
 					slotProps={{
 						root: {
-							keepMounted: true, // Better open performance on mobile.
+							keepMounted: true,
 						},
 					}}>
 					{drawer}
@@ -195,48 +119,6 @@ export default function ResponsiveDrawer(props) {
 					<Outlet />
 				</div>
 			</Box>
-			{/* <Box
-				component="main"
-				sx={{
-					flexGrow: 1,
-					p: 3,
-					width: { sm: `calc(100% - ${drawerWidth}px)` },
-				}}>
-				<Toolbar />
-				<Typography sx={{ marginBottom: 2 }}>
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-					do eiusmod tempor incididunt ut labore et dolore magna
-					aliqua. Rhoncus dolor purus non enim praesent elementum
-					facilisis leo vel. Risus at ultrices mi tempus imperdiet.
-					Semper risus in hendrerit gravida rutrum quisque non tellus.
-					Convallis convallis tellus id interdum velit laoreet id
-					donec ultrices. Odio morbi quis commodo odio aenean sed
-					adipiscing. Amet nisl suscipit adipiscing bibendum est
-					ultricies integer quis. Cursus euismod quis viverra nibh
-					cras. Metus vulputate eu scelerisque felis imperdiet proin
-					fermentum leo. Mauris commodo quis imperdiet massa
-					tincidunt. Cras tincidunt lobortis feugiat vivamus at augue.
-					At augue eget arcu dictum varius duis at consectetur lorem.
-					Velit sed ullamcorper morbi tincidunt. Lorem donec massa
-					sapien faucibus et molestie ac.
-				</Typography>
-				<Typography sx={{ marginBottom: 2 }}>
-					Consequat mauris nunc congue nisi vitae suscipit. Fringilla
-					est ullamcorper eget nulla facilisi etiam dignissim diam.
-					Pulvinar elementum integer enim neque volutpat ac tincidunt.
-					Ornare suspendisse sed nisi lacus sed viverra tellus. Purus
-					sit amet volutpat consequat mauris. Elementum eu facilisis
-					sed odio morbi. Euismod lacinia at quis risus sed vulputate
-					odio. Morbi tincidunt ornare massa eget egestas purus
-					viverra accumsan in. In hendrerit gravida rutrum quisque non
-					tellus orci ac. Pellentesque nec nam aliquam sem et tortor.
-					Habitant morbi tristique senectus et. Adipiscing elit duis
-					tristique sollicitudin nibh sit. Ornare aenean euismod
-					elementum nisi quis eleifend. Commodo viverra maecenas
-					accumsan lacus vel facilisis. Nulla posuere sollicitudin
-					aliquam ultrices sagittis orci a.
-				</Typography>
-			</Box> */}
 		</Box>
 	);
 }

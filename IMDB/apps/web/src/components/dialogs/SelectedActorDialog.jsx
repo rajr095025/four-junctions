@@ -19,12 +19,10 @@ import {
 	CircularProgress,
 	Avatar,
 } from "@mui/material";
-
 import Divider from "@mui/material/Divider";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-
 import { useGetAllActors } from "../../hooks/actors";
 import { useGetAllProducers } from "../../hooks/producers";
 import { closeDialog } from "../../store/slices/dialogSlice";
@@ -81,55 +79,18 @@ export default function SelectedActorDialog() {
 		dispatch(closeDialog({ type: "selectedActor" }));
 	};
 
-	// const { data: movie, isLoading: movieLoading } =
-	// 	useGetFullMovieDetails(selectedItem);
-	// const { data: videos, isLoading: videoLoading } =
-	// 	useGetMovieVideoLinks(selectedItem);
-	// const { data: credits, isLoading: creditLoading } =
-	// 	useGetMovieCredits(selectedItem);
-
-	// const director = credits?.crew?.find((person) => person.job === "Director");
-
-	// let uniqueCrew = credits?.crew?.sort(
-	// 	(a, b) =>
-	// 		crewTypeSortOrder[a.department] - crewTypeSortOrder[b.department]
-	// );
-
-	// uniqueCrew = uniqueCrew
-	// 	? Object.values(
-	// 			uniqueCrew?.reduce((acc, person) => {
-	// 				acc[person.id] = person;
-	// 				return acc;
-	// 			}, {})
-	// 	  )
-	// 	: [];
-
-	// // console.log("movie", movie);
-	// useEffect(() => {
-	// 	console.log("Movie", movie, "videos", videos, "credits", credits);
-	// }, [movie, videos, credits]);
-
-	// const isLoading = movieLoading || videoLoading || creditLoading;
 	const { data: actor, isActorDetailsLoading } =
 		useGetFullActorDetails(selectedItem);
 	const { data: actorMovies, isActorMoviesLoading } =
 		useGetFullActorMovies(selectedItem);
 
-	console.log(selectedItem, "actor", actor, "actorMovies", actorMovies);
+	if (!selectedItem || !actor){ 
+		return null
+	};
 
-	// let actor = {};
-
-	if (!selectedItem || !actor) return <></>;
-
-	// if (isLoading) {
-	// 	return (
-	// 		<div className="h-full w-2/3 flex items-center justify-center">
-	// 			<CircularProgress size={20} />
-	// 		</div>
-	// 	);
-	// }
-
-	if (!selectedItem) return <></>;
+	if (!selectedItem){
+		return null
+	};
 
 	if (isActorDetailsLoading || isActorMoviesLoading) {
 		return (
@@ -212,24 +173,10 @@ export default function SelectedActorDialog() {
 						</h3>
 						<div className="grid grid-cols-3 gap-5 h-64 overflow-y-auto">
 							{actorMovies?.cast?.map((cast) => (
-								// <Chip
-								// 	icon={<YouTubeIcon />}
-								// 	label={`${cast.character} - ${cast.original_name}`}
-								// 	// title="Click to view"
-								// 	// onClick={() =>
-								// 	// 	window.open(
-								// 	// 		`https://www.youtube.com/watch?v=${video.key}`,
-								// 	// 		"_blank"
-								// 	// 	)
-								// 	// }
-								// />
 								<div className="flex">
-									{/* <img src=""></img>
-									 */}
 									<img
 										className="h-24 w-20"
 										src={`https://image.tmdb.org/t/p/w500${cast?.poster_path}`}>
-										{/* {cast.name.slice(0, 2)} */}
 									</img>
 									<p className="flex flex-col m-2 mt-2">
 										<p className="font-bold">

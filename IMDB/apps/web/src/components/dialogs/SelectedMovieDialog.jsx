@@ -117,19 +117,10 @@ export default function SelectedMovieDialog() {
 		  )
 		: [];
 
-	// console.log("movie", movie);
-	useEffect(() => {
-		console.log("Movie", movie, "videos", videos, "credits", credits);
-	}, [movie, videos, credits]);
-
 	const isLoading = movieLoading || videoLoading || creditLoading;
 
 	if (!selectedItem)
-		return (
-			<div className="h-full w-2/3 flex items-center justify-center">
-				{/* <p>Invalid Movie Details</p> */}
-			</div>
-		);
+		return null;
 
 	if (isLoading) {
 		return (
@@ -140,206 +131,169 @@ export default function SelectedMovieDialog() {
 	}
 
 	return (
-		<>
-			<Dialog open={open} onClose={handleClose} maxWidth="xl" fullWidth>
-				{/* <MovieDetails movieId={selectedItem}></MovieDetails> */}
-				<div className="p-4 flex flex-col items-center">
-					<header className="relative m-1 w-full">
-						<h2 className="text-center text-2xl font-bold mb-2">
-							{movie.title}
-						</h2>
-						<div
-							className="absolute top-1 right-2 hover:cursor-pointer"
-							onClick={handleClose}>
-							<CloseIcon></CloseIcon>
-						</div>
-					</header>
+		<Dialog open={open} onClose={handleClose} maxWidth="xl" fullWidth>
+			<div className="p-4 flex flex-col items-center">
+				<header className="relative m-1 w-full">
+					<h2 className="text-center text-2xl font-bold mb-2">
+						{movie.title}
+					</h2>
 					<div
-						className={`grid [grid-template-columns:2fr_2fr_3fr_3fr] gap-2 text-center`}>
+						className="absolute top-1 right-2 hover:cursor-pointer"
+						onClick={handleClose}>
+						<CloseIcon></CloseIcon>
+					</div>
+				</header>
+				<div
+					className={`grid [grid-template-columns:2fr_2fr_3fr_3fr] gap-2 text-center`}>
+					<div>
+						{movie.poster_path && (
+							<img
+								src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+								alt={movie.title}
+								className="rounded-2xl shadow-lg mb-4 w-50 h-60"
+							/>
+						)}
+						<Divider orientation="vertical" flexItem />
+					</div>
+					<section>
+						<header className="text-left font-bold text-md">
+							Details
+						</header>
 						<div>
-							{movie.poster_path && (
-								<img
-									src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-									alt={movie.title}
-									className="rounded-2xl shadow-lg mb-4 w-50 h-60"
-								/>
-							)}
-							<Divider orientation="vertical" flexItem />
-						</div>
-
-						<section>
-							<header className="text-left font-bold text-md">
-								Details
-							</header>
-							<div>
-								{director && (
-									<p className="text-left font-bold text-sm">
-										<span className="text-left font-bold text-sm text-gray-500">
-											Director : &nbsp;
-										</span>
-										{director?.original_name}
-									</p>
-								)}
-								{movie.spoken_languages && (
-									<p className="text-left font-bold text-sm">
-										<span className="text-left font-bold text-sm text-gray-500">
-											Language : &nbsp;
-										</span>
-										{
-											movie.spoken_languages?.[0]
-												?.english_name
-										}
-									</p>
-								)}
-								{movie.release_date && (
-									<p className="text-left font-bold text-sm">
-										<span className="text-left font-bold text-sm text-gray-500">
-											Release Date : &nbsp;
-										</span>
-										{movie.release_date}
-									</p>
-								)}
-								{movie.status && (
-									<p className="text-left font-bold text-sm">
-										<span className="text-left font-bold text-sm text-gray-500">
-											Status : &nbsp;
-										</span>
-										{movie.status}
-									</p>
-								)}
-
-								<p>
-									<p className="text-left font-bold text-sm text-gray-500">
-										Genre:
-									</p>
-									<Stack direction="row" spacing={1}>
-										{movie?.genres?.map((genre) => (
-											<Chip label={genre.name} />
-										))}
-									</Stack>
+							{director && (
+								<p className="text-left font-bold text-sm">
+									<span className="text-left font-bold text-sm text-gray-500">
+										Director : &nbsp;
+									</span>
+									{director?.original_name}
 								</p>
-							</div>
-						</section>
-
-						<div>
-							<p className="text-left font-bold text-lg ">Plot</p>
-							<p className="mb-2 text-left max-h-44 overflow-y-auto">
-								{movie.overview}
+							)}
+							{movie.spoken_languages && (
+								<p className="text-left font-bold text-sm">
+									<span className="text-left font-bold text-sm text-gray-500">
+										Language : &nbsp;
+									</span>
+									{
+										movie.spoken_languages?.[0]
+											?.english_name
+									}
+								</p>
+							)}
+							{movie.release_date && (
+								<p className="text-left font-bold text-sm">
+									<span className="text-left font-bold text-sm text-gray-500">
+										Release Date : &nbsp;
+									</span>
+									{movie.release_date}
+								</p>
+							)}
+							{movie.status && (
+								<p className="text-left font-bold text-sm">
+									<span className="text-left font-bold text-sm text-gray-500">
+										Status : &nbsp;
+									</span>
+									{movie.status}
+								</p>
+							)}
+							<p>
+								<p className="text-left font-bold text-sm text-gray-500">
+									Genre:
+								</p>
+								<Stack direction="row" spacing={1}>
+									{movie?.genres?.map((genre) => (
+										<Chip label={genre.name} />
+									))}
+								</Stack>
 							</p>
 						</div>
-
-						<section>
-							{(videos?.results ?? []).length > 0 && (
-								<div className="w-full">
-									<h3 className="text-lg text-left font-semibold mb-2">
-										Videos
-									</h3>
-									<div className="flex flex-wrap gap-2 max-h-44 max-w-96 overflow-y-auto">
-										{videos.results
-											?.sort(
-												(a, b) =>
-													videoTypeSortOrder[a.type] -
-													videoTypeSortOrder[b.type]
-											)
-											?.map((video) => (
-												<Chip
-													icon={<YouTubeIcon />}
-													label={`${video.type} - ${video.name}`}
-													title="Click to view"
-													onClick={() =>
-														window.open(
-															`https://www.youtube.com/watch?v=${video.key}`,
-															"_blank"
-														)
-													}
-												/>
-											))}
-									</div>
-								</div>
-							)}
-						</section>
+					</section>
+					<div>
+						<p className="text-left font-bold text-lg ">Plot</p>
+						<p className="mb-2 text-left max-h-44 overflow-y-auto">
+							{movie.overview}
+						</p>
 					</div>
-
-					{(credits?.cast ?? []).length > 0 && (
-						<div className="m-4 mt-4 px-16 w-full">
-							<h3 className="text-xl text-left font-semibold mb-2">
-								Casts
-							</h3>
-							<div className="grid grid-cols-4 gap-5 h-40 overflow-y-auto">
-								{credits?.cast?.map((cast) => (
-									// <Chip
-									// 	icon={<YouTubeIcon />}
-									// 	label={`${cast.character} - ${cast.original_name}`}
-									// 	// title="Click to view"
-									// 	// onClick={() =>
-									// 	// 	window.open(
-									// 	// 		`https://www.youtube.com/watch?v=${video.key}`,
-									// 	// 		"_blank"
-									// 	// 	)
-									// 	// }
-									// />
-									<div className="flex">
-										{/* <img src=""></img>
-										 */}
-										<Avatar
-											className="h-20 w-20"
-											src={`https://image.tmdb.org/t/p/w500${cast?.profile_path}`}>
-											{cast.name.slice(0, 2)}
-										</Avatar>
-										<p className="flex flex-col m-2 mt-2">
-											<p className="font-bold">
-												{cast.original_name}
-											</p>
-											<p>{cast.character}</p>
-										</p>
-									</div>
-								))}
+					<section>
+						{(videos?.results ?? []).length > 0 && (
+							<div className="w-full">
+								<h3 className="text-lg text-left font-semibold mb-2">
+									Videos
+								</h3>
+								<div className="flex flex-wrap gap-2 max-h-44 max-w-96 overflow-y-auto">
+									{videos.results
+										?.sort(
+											(a, b) =>
+												videoTypeSortOrder[a.type] -
+												videoTypeSortOrder[b.type]
+										)
+										?.map((video) => (
+											<Chip
+												icon={<YouTubeIcon />}
+												label={`${video.type} - ${video.name}`}
+												title="Click to view"
+												onClick={() =>
+													window.open(
+														`https://www.youtube.com/watch?v=${video.key}`,
+														"_blank"
+													)
+												}
+											/>
+										))}
+								</div>
 							</div>
-						</div>
-					)}
-
-					{/* <section className="flex gap-4 justify-center"> */}
-					{(uniqueCrew ?? []).length > 0 && (
-						<div className="m-4 mt-4 px-16 w-full">
-							<h3 className="text-xl text-left font-semibold mb-2">
-								Crew
-							</h3>
-							<div className="grid grid-cols-4 gap-5 h-40 overflow-y-auto">
-								{uniqueCrew?.map((person) => (
-									// <Chip
-									// 	icon={<YouTubeIcon />}
-									// 	label={`${person.character} - ${person.original_name}`}
-									// 	// title="Click to view"
-									// 	// onClick={() =>
-									// 	// 	window.open(
-									// 	// 		`https://www.youtube.com/watch?v=${video.key}`,
-									// 	// 		"_blank"
-									// 	// 	)
-									// 	// }
-									// />
-									<div className="flex">
-										{/* <img src=""></img>
-										 */}
-										<Avatar
-											className="h-20 w-20"
-											src={`https://image.tmdb.org/t/p/w500${person?.profile_path}`}>
-											{person.name.slice(0, 2)}
-										</Avatar>
-										<p className="flex flex-col m-2 mt-2">
-											<p className="font-bold">
-												{person.original_name}
-											</p>
-											<p>{person.job}</p>
-										</p>
-									</div>
-								))}
-							</div>
-						</div>
-					)}
-
-					{/* </section> */}
+						)}
+					</section>
 				</div>
-			</Dialog>
-		</>
+				{(credits?.cast ?? []).length > 0 && (
+					<div className="m-4 mt-4 px-16 w-full">
+						<h3 className="text-xl text-left font-semibold mb-2">
+							Casts
+						</h3>
+						<div className="grid grid-cols-4 gap-5 h-40 overflow-y-auto">
+							{credits?.cast?.map((cast) => (
+								<div className="flex">
+										*/}
+									<Avatar
+										className="h-20 w-20"
+										src={`https://image.tmdb.org/t/p/w500${cast?.profile_path}`}>
+										{cast.name.slice(0, 2)}
+									</Avatar>
+									<p className="flex flex-col m-2 mt-2">
+										<p className="font-bold">
+											{cast.original_name}
+										</p>
+										<p>{cast.character}</p>
+									</p>
+								</div>
+							))}
+						</div>
+					</div>
+				)}
+				{(uniqueCrew ?? []).length > 0 && (
+					<div className="m-4 mt-4 px-16 w-full">
+						<h3 className="text-xl text-left font-semibold mb-2">
+							Crew
+						</h3>
+						<div className="grid grid-cols-4 gap-5 h-40 overflow-y-auto">
+							{uniqueCrew?.map((person) => (
+								<div className="flex">
+									<Avatar
+										className="h-20 w-20"
+										src={`https://image.tmdb.org/t/p/w500${person?.profile_path}`}>
+										{person.name.slice(0, 2)}
+									</Avatar>
+									<p className="flex flex-col m-2 mt-2">
+										<p className="font-bold">
+											{person.original_name}
+										</p>
+										<p>{person.job}</p>
+									</p>
+								</div>
+							))}
+						</div>
+					</div>
+				)}
+			</div>
+		</Dialog>
 	);
 }

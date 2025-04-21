@@ -120,7 +120,6 @@ export default function Producers() {
 					</TableBody>
 				</Table>
 			</TableContainer>
-
 			<ProducerDialog />
 		</Box>
 	);

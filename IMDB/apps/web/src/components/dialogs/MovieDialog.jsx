@@ -158,208 +158,206 @@ export default function MovieDialog() {
 	};
 
 	return (
-		<>
-			<Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-				<DialogTitle>
-					{selectedItem ? "Edit Movie" : "Add New Movie"}
-				</DialogTitle>
-				<form onSubmit={handleSubmit(onSubmit)}>
-					<DialogContent>
-						<Box className="space-y-4">
-							<TextField
-								fullWidth
-								label="Name"
-								{...register("name", {
-									onChange: (e) =>
-										setSuggestionsSearch(e.target.value),
-								})}
-								autoComplete="off"
-								error={!!errors.name}
-								helperText={errors.name?.message}
+		<Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+			<DialogTitle>
+				{selectedItem ? "Edit Movie" : "Add New Movie"}
+			</DialogTitle>
+			<form onSubmit={handleSubmit(onSubmit)}>
+				<DialogContent>
+					<Box className="space-y-4">
+						<TextField
+							fullWidth
+							label="Name"
+							{...register("name", {
+								onChange: (e) =>
+									setSuggestionsSearch(e.target.value),
+							})}
+							autoComplete="off"
+							error={!!errors.name}
+							helperText={errors.name?.message}
+						/>
+						{(suggestions ?? []).length > 0 && (
+							<ul className="absolute z-10 border rounded bg-white mt-1 shadow-lg max-h-60 overflow-auto">
+								{suggestions.map((movie) => (
+									<li
+										key={movie.id}
+										className="p-2 hover:bg-gray-100 cursor-pointer"
+										onClick={onMovieSelect(movie)}>
+										{movie.title}
+									</li>
+								))}
+							</ul>
+						)}
+						<TextField
+							fullWidth
+							label="Release Date"
+							type="date"
+							slotProps={{
+								inputLabel: {
+									shrink: true,
+								},
+							}}
+							{...register("releasedAt")}
+							error={!!errors.releasedAt}
+							helperText={errors.releasedAt?.message}
+						/>
+						<TextField
+							fullWidth
+							label="Plot"
+							multiline
+							rows={4}
+							{...register("plot")}
+							error={!!errors.plot}
+							helperText={errors.plot?.message}
+						/>
+						<Box className="flex gap-2 flex-col">
+							<Typography variant="subtitle1" gutterBottom>
+								Poster
+							</Typography>
+							<img
+								className="h-40 w-40 self-center object-contain"
+								src={`https://image.tmdb.org/t/p/w500${currentPosterPath}`}
 							/>
-							{(suggestions ?? []).length > 0 && (
-								<ul className="absolute z-10 border rounded bg-white mt-1 shadow-lg max-h-60 overflow-auto">
-									{suggestions.map((movie) => (
-										<li
-											key={movie.id}
-											className="p-2 hover:bg-gray-100 cursor-pointer"
-											onClick={onMovieSelect(movie)}>
-											{movie.title}
-										</li>
-									))}
-								</ul>
-							)}
-							<TextField
-								fullWidth
-								label="Release Date"
-								type="date"
-								slotProps={{
-									inputLabel: {
-										shrink: true,
-									},
-								}}
-								{...register("releasedAt")}
-								error={!!errors.releasedAt}
-								helperText={errors.releasedAt?.message}
-							/>
-							<TextField
-								fullWidth
-								label="Plot"
-								multiline
-								rows={4}
-								{...register("plot")}
-								error={!!errors.plot}
-								helperText={errors.plot?.message}
-							/>
-							<Box className="flex gap-2 flex-col">
-								<Typography variant="subtitle1" gutterBottom>
-									Poster
+							{errors.poster && (
+								<Typography color="error" variant="caption">
+									{errors.poster.message}
 								</Typography>
-								<img
-									className="h-40 w-40 self-center object-contain"
-									src={`https://image.tmdb.org/t/p/w500${currentPosterPath}`}
-								/>
-								{errors.poster && (
-									<Typography color="error" variant="caption">
-										{errors.poster.message}
-									</Typography>
-								)}
-							</Box>
-							<Box className="flex items-center gap-2">
-								<FormControl
-									fullWidth
-									error={!!errors.producer}>
-									<InputLabel id="producer-label">
-										Producer
-									</InputLabel>
-									<Controller
-										name="producer"
-										control={control}
-										defaultValue=""
-										render={({ field }) => (
-											<Select
-												{...field}
-												labelId="producer-label"
-												label="Producer">
-												{producersData?.map(
-													(producer) => (
-														<MenuItem
-															key={producer._id}
-															value={
-																producer._id
-															}>
-															{producer.name}
-														</MenuItem>
-													)
-												)}
-											</Select>
-										)}
-									/>
-									{errors.producer && (
-										<Box className="text-red-500 text-sm mt-1">
-											{errors.producer.message}
-										</Box>
-									)}
-								</FormControl>
-								<IconButton
-									color="primary"
-									onClick={handleOpenProducerDialog}
-									title="Add new producer">
-									<AddIcon />
-								</IconButton>
-							</Box>
-							<Box className="flex items-center gap-2">
-								<FormControl fullWidth error={!!errors.actors}>
-									<InputLabel id="actors-label">
-										Actors
-									</InputLabel>
-									<Controller
-										name="actors"
-										control={control}
-										defaultValue={[]}
-										render={({ field }) => (
-											<Select
-												{...field}
-												labelId="actors-label"
-												multiple
-												value={field.value}
-												onChange={(e) =>
-													field.onChange(
-														e.target.value
-													)
-												}
-												input={
-													<OutlinedInput label="Actors" />
-												}
-												renderValue={(selected) => (
-													<Box className="flex flex-wrap gap-2">
-														{selected.map(
-															(value) => {
-																const actor =
-																	actorsData?.find(
-																		(a) =>
-																			a._id ===
-																			value
-																	);
-																return (
-																	<Chip
-																		key={
-																			value?._id
-																		}
-																		label={
-																			actor?.name ||
-																			value
-																		}
-																	/>
-																);
-															}
-														)}
-													</Box>
-												)}
-												MenuProps={MenuProps}>
-												{actorsData?.map((actor) => (
-													<MenuItem
-														key={actor._id}
-														value={actor._id}>
-														{actor.name}
-													</MenuItem>
-												))}
-											</Select>
-										)}
-									/>
-									{errors.actors && (
-										<Box className="text-red-500 text-sm mt-1">
-											{errors.actors.message}
-										</Box>
-									)}
-								</FormControl>
-								<IconButton
-									color="primary"
-									onClick={handleOpenActorDialog}
-									title="Add new actor">
-									<AddIcon />
-								</IconButton>
-							</Box>
+							)}
 						</Box>
-					</DialogContent>
-					<DialogActions>
-						<Button disabled={isPending} onClick={handleClose}>
-							Cancel
-						</Button>
-						<Button
-							type="submit"
-							variant="contained"
-							startIcon={
-								isPending ? (
-									<CircularProgress size={15} />
-								) : null
-							}
-							disabled={isPending}>
-							{selectedItem ? "Update" : "Add"}
-						</Button>
-					</DialogActions>
-				</form>
-			</Dialog>
-		</>
+						<Box className="flex items-center gap-2">
+							<FormControl
+								fullWidth
+								error={!!errors.producer}>
+								<InputLabel id="producer-label">
+									Producer
+								</InputLabel>
+								<Controller
+									name="producer"
+									control={control}
+									defaultValue=""
+									render={({ field }) => (
+										<Select
+											{...field}
+											labelId="producer-label"
+											label="Producer">
+											{producersData?.map(
+												(producer) => (
+													<MenuItem
+														key={producer._id}
+														value={
+															producer._id
+														}>
+														{producer.name}
+													</MenuItem>
+												)
+											)}
+										</Select>
+									)}
+								/>
+								{errors.producer && (
+									<Box className="text-red-500 text-sm mt-1">
+										{errors.producer.message}
+									</Box>
+								)}
+							</FormControl>
+							<IconButton
+								color="primary"
+								onClick={handleOpenProducerDialog}
+								title="Add new producer">
+								<AddIcon />
+							</IconButton>
+						</Box>
+						<Box className="flex items-center gap-2">
+							<FormControl fullWidth error={!!errors.actors}>
+								<InputLabel id="actors-label">
+									Actors
+								</InputLabel>
+								<Controller
+									name="actors"
+									control={control}
+									defaultValue={[]}
+									render={({ field }) => (
+										<Select
+											{...field}
+											labelId="actors-label"
+											multiple
+											value={field.value}
+											onChange={(e) =>
+												field.onChange(
+													e.target.value
+												)
+											}
+											input={
+												<OutlinedInput label="Actors" />
+											}
+											renderValue={(selected) => (
+												<Box className="flex flex-wrap gap-2">
+													{selected.map(
+														(value) => {
+															const actor =
+																actorsData?.find(
+																	(a) =>
+																		a._id ===
+																		value
+																);
+															return (
+																<Chip
+																	key={
+																		value?._id
+																	}
+																	label={
+																		actor?.name ||
+																		value
+																	}
+																/>
+															);
+														}
+													)}
+												</Box>
+											)}
+											MenuProps={MenuProps}>
+											{actorsData?.map((actor) => (
+												<MenuItem
+													key={actor._id}
+													value={actor._id}>
+													{actor.name}
+												</MenuItem>
+											))}
+										</Select>
+									)}
+								/>
+								{errors.actors && (
+									<Box className="text-red-500 text-sm mt-1">
+										{errors.actors.message}
+									</Box>
+								)}
+							</FormControl>
+							<IconButton
+								color="primary"
+								onClick={handleOpenActorDialog}
+								title="Add new actor">
+								<AddIcon />
+							</IconButton>
+						</Box>
+					</Box>
+				</DialogContent>
+				<DialogActions>
+					<Button disabled={isPending} onClick={handleClose}>
+						Cancel
+					</Button>
+					<Button
+						type="submit"
+						variant="contained"
+						startIcon={
+							isPending ? (
+								<CircularProgress size={15} />
+							) : null
+						}
+						disabled={isPending}>
+						{selectedItem ? "Update" : "Add"}
+					</Button>
+				</DialogActions>
+			</form>
+		</Dialog>
 	);
 }

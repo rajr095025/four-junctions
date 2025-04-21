@@ -3,7 +3,6 @@ import {
 	useGetActorSuggestions,
 	useGetPopularActors,
 } from "../../hooks/actors";
-
 import { openDialog } from "../../store/slices/dialogSlice";
 import { useDispatch } from "react-redux";
 import ActorDialog from "../../components/dialogs/ActorDialog";
@@ -21,9 +20,7 @@ export default function ActorList({ searchTerm }) {
 	} = useGetActorSuggestions(searchTerm);
 
 	function onActorSelect(actor, actor2) {
-		console.log("onActorSelect ", "actor ", actor, actor2);
 		dispatch(openDialog({ type: "selectedActor", item: actor }));
-		// setSelectedMovieId(movie);
 	}
 
 	const actors =
@@ -55,7 +52,7 @@ export default function ActorList({ searchTerm }) {
 					</div>
 				))}
 			</div>
-			<SelectedActorDialog></SelectedActorDialog>
+			<SelectedActorDialog />
 		</>
 	);
 }

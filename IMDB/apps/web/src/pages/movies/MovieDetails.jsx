@@ -17,8 +17,6 @@ export default function MovieDetails({ movieId }) {
 	const { data: videos, isLoading: videoLoading } =
 		useGetMovieVideoLinks(movieId);
 
-	console.log("movie", movie);
-
 	const isLoading = movieLoading || videoLoading;
 
 	if (isLoading) {
@@ -35,7 +33,7 @@ export default function MovieDetails({ movieId }) {
 					{movie.title}
 				</h2>
 				<div className="absolute top-1 right-2 hover:cursor-pointer">
-					<CloseIcon></CloseIcon>
+					<CloseIcon />
 				</div>
 			</header>
 			<div
@@ -55,7 +53,6 @@ export default function MovieDetails({ movieId }) {
 						<p className="text-left font-bold text-sm text-gray-500">
 							Release Date: {movie.release_date}
 						</p>
-						{/* <p>{movie.release_date}</p> */}
 					</p>
 
 					<p>

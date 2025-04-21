@@ -51,7 +51,6 @@ export default function Movies() {
 
 	function onMovieSelect(movie) {
 		dispatch(openDialog({ type: "selectedMovie", item: movie }));
-		// setSelectedMovieId(movie);
 	}
 
 	return (
@@ -172,7 +171,6 @@ export default function Movies() {
 					)}
 				</div>
 			)}
-
 			<ActorDialog />
 			<ProducerDialog />
 			<MovieDialog />
