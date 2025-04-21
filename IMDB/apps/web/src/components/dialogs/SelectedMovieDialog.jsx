@@ -119,8 +119,7 @@ export default function SelectedMovieDialog() {
 
 	const isLoading = movieLoading || videoLoading || creditLoading;
 
-	if (!selectedItem)
-		return null;
+	if (!selectedItem) return null;
 
 	if (isLoading) {
 		return (
@@ -173,10 +172,7 @@ export default function SelectedMovieDialog() {
 									<span className="text-left font-bold text-sm text-gray-500">
 										Language : &nbsp;
 									</span>
-									{
-										movie.spoken_languages?.[0]
-											?.english_name
-									}
+									{movie.spoken_languages?.[0]?.english_name}
 								</p>
 							)}
 							{movie.release_date && (
@@ -252,7 +248,6 @@ export default function SelectedMovieDialog() {
 						<div className="grid grid-cols-4 gap-5 h-40 overflow-y-auto">
 							{credits?.cast?.map((cast) => (
 								<div className="flex">
-										*/}
 									<Avatar
 										className="h-20 w-20"
 										src={`https://image.tmdb.org/t/p/w500${cast?.profile_path}`}>
